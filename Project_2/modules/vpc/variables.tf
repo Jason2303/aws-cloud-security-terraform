@@ -27,9 +27,3 @@ variable "route_CIDR" {
     description = "route CIDR range"
     default = "0.0.0.0/0"
 }
-
-variable "instance_type" {
-    type = string
-    description = "instance_type"
-    default = "t2.micro"
-}

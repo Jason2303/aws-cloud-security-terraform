@@ -1,19 +1,19 @@
-#Use this to reference VPC ID and Subnet IDs for other modules
 output "vpc-id" {
     description = "vpc ID"
-    value = module.vpc.vpc-id
+    value = aws_vpc.my_vpc.id
 }
 
 output "private-id" {
     description = "private subnet ID"
-    value = module.vpc.private-id
+    value = aws_subnet.private.id
 }
 
 output "public-id" {
     description = "public subnet ID"
-    value = module.vpc.public-id
+    value = aws_subnet.public.id
 }
 
 output "public-id_2" {
-    value = module.vpc.public-id_2
+    description = "public subnet ID"
+    value = aws_subnet.public_2.id
 }
