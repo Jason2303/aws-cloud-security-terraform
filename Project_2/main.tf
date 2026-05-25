@@ -92,7 +92,7 @@ resource "aws_lb_target_group" "target_group" {
   protocol = "HTTP"
   vpc_id   = module.vpc.vpc-id
 
-   health_check {
+  health_check {
     path                = "/"
     protocol            = "HTTP"
     matcher             = "200"
@@ -117,8 +117,8 @@ resource "aws_lb_listener" "front_end" {
 }
 
 resource "aws_launch_template" "launch_temp" {
-  name = "project-launch-template"
-  image_id = "ami-0236922087fa98b6e"
+  name          = "project-launch-template"
+  image_id      = "ami-0236922087fa98b6e"
   instance_type = var.instance_type
 
   vpc_security_group_ids = [aws_security_group.allow_traffic.id]
@@ -135,10 +135,10 @@ resource "aws_launch_template" "launch_temp" {
 
 resource "aws_autoscaling_group" "scale" {
   vpc_zone_identifier = [module.vpc.private-id]
-  desired_capacity   = 1
-  max_size           = 5
-  min_size           = 1
-  target_group_arns = [aws_lb_target_group.target_group.arn]
+  desired_capacity    = 1
+  max_size            = 5
+  min_size            = 1
+  target_group_arns   = [aws_lb_target_group.target_group.arn]
 
   launch_template {
     id      = aws_launch_template.launch_temp.id
