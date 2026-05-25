@@ -31,7 +31,7 @@ jobs:
       - name: Terraform Plan
         run: terraform plan
         
-- name: Checkov Scan
+      - name: Checkov Scan
         run: |
           pip install checkov
           checkov -d . --skip-check CKV_AWS_144,CKV_AWS_117,CKV2_AWS_62,CKV2_AWS_6,CKV_AWS_18,CKV2_AWS_61
