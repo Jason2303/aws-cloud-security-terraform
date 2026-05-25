@@ -25,12 +25,15 @@ jobs:
 
       - name: Terraform Format
         run: terraform fmt -check
+        working-directory: Project_2
 
       - name: Terraform Validate
         run: terraform validate
+        working-directory: Project_2
 
       - name: Terraform Plan
         run: terraform plan
+        working-directory: Project_2
         
       - name: Checkov Scan
         run: |
