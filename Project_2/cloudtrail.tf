@@ -22,7 +22,7 @@ data "aws_iam_policy_document" "allow_access_for_CloudTrail" {
 
     actions = [
       "s3:GetBucketAcl",
-      
+
     ]
 
     resources = [
@@ -38,7 +38,7 @@ data "aws_iam_policy_document" "allow_access_for_CloudTrail" {
 
     actions = [
       "s3:PutObject",
-      
+
     ]
 
     resources = [
@@ -53,8 +53,8 @@ resource "aws_cloudtrail" "cloudtrail_logs" {
   name                          = "cloudtrail"
   s3_bucket_name                = aws_s3_bucket.trails.id
   include_global_service_events = true
-  enable_log_file_validation = true  
-  is_multi_region_trail = true
+  enable_log_file_validation    = true
+  is_multi_region_trail         = true
 }
 
 
