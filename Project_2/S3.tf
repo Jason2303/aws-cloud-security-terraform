@@ -19,7 +19,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "sse-kms" {
 }
 
 resource "aws_s3_bucket_acl" "example" {
-  bucket = aws_s3_bucket.example.id
+  bucket = aws_s3_bucket.KMS-locked.id
   acl    = "private"
 }
 
