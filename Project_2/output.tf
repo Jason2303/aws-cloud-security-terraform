@@ -16,9 +16,6 @@ output "public-id" {
 
 output "public-id_2" {
   value = module.vpc.public-id_2
-<<<<<<< HEAD
-}
-=======
 }
 
 output "kms-key" {
@@ -30,5 +27,3 @@ output "kms-alias-key" {
   description = "kms key for S3 bucket"
   value       = aws_kms_alias.kms-alias.arn
 }
-
->>>>>>> main
