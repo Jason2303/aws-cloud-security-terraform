@@ -1,23 +1,17 @@
 resource "aws_guardduty_detector" "MyDetector" {
   enable = true
+}
 
-  datasources {
-    s3_logs {
-      enable = true
-    }
-    kubernetes {
-      audit_logs {
-        enable = false
-      }
-    }
-    malware_protection {
-      scan_ec2_instance_with_findings {
-        ebs_volumes {
-          enable = true
-        }
-      }
-    }
-  }
+resource "aws_guardduty_detector_feature" "s3_logs" {
+  detector_id = aws_guardduty_detector.MyDetector.id
+  name        = "S3_DATA_EVENTS"
+  status      = "ENABLED"
+}
+
+resource "aws_guardduty_detector_feature" "malware_protection" {
+  detector_id = aws_guardduty_detector.MyDetector.id
+  name        = "EBS_MALWARE_PROTECTION"
+  status      = "ENABLED"
 }
 
 resource "aws_securityhub_account" "security_hub" {}

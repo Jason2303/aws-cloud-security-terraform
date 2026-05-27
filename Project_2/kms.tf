@@ -19,9 +19,10 @@ resource "aws_kms_key" "kms-key" {
       },
       {
         Sid    = "Allow administration of the key"
+        #administers the key
         Effect = "Allow"
         Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/Alice"
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/iamadmin"
         },
         Action = [
           "kms:ReplicateKey",
@@ -42,9 +43,10 @@ resource "aws_kms_key" "kms-key" {
       },
       {
         Sid    = "Allow use of the key"
+        #delegated for use of the key
         Effect = "Allow"
         Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/Bob"
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/iamadmin"
         },
         Action = [
           "kms:DescribeKey",
@@ -59,3 +61,12 @@ resource "aws_kms_key" "kms-key" {
     ]
   })
 }
+
+
+resource "aws_kms_alias" "kms-alias" {
+  name          = "alias/my-key-alias"
+  target_key_id = aws_kms_key.kms-key.id
+}
+
+
+
