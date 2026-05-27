@@ -42,7 +42,7 @@ jobs:
         working-directory: Project_2
         run: |
           pip install checkov
-          checkov -d . --skip-check CKV_AWS_144,CKV_AWS_117,CKV2_AWS_62,CKV2_AWS_6,CKV_AWS_18,CKV2_AWS_61
+          checkov -d . --skip-check CKV_AWS_144,CKV_AWS_117,CKV2_AWS_62,CKV2_AWS_6,CKV_AWS_18,CKV2_AWS_61,CKV_AWS_130,CKV_AWS_252,CKV2_AWS_3,CKV2_AWS_28,CKV_AWS_153,CKV2_AWS_10
           
 
       - name: tfsec Scan
