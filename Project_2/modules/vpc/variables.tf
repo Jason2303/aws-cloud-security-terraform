@@ -27,3 +27,8 @@ variable "route_CIDR" {
   description = "route CIDR range"
   default     = "0.0.0.0/0"
 }
+
+variable "kms_key_arn" {
+  description = "KMS key ARN for CloudWatch log group encryption"
+  type        = string
+}
