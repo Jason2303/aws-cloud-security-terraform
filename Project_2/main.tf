@@ -11,6 +11,7 @@ module "vpc" {
   public_CIDR   = var.public_CIDR
   public_2_CIDR = var.public_2_CIDR
   route_CIDR    = var.route_CIDR
+  kms_key_arn   = aws_kms_key.kms-key.arn
 }
 
 resource "aws_security_group" "allow_traffic" {
