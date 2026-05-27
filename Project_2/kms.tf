@@ -18,7 +18,7 @@ resource "aws_kms_key" "kms-key" {
         Resource = "*"
       },
       {
-        Sid    = "Allow administration of the key"
+        Sid = "Allow administration of the key"
         #administers the key
         Effect = "Allow"
         Principal = {
@@ -42,7 +42,7 @@ resource "aws_kms_key" "kms-key" {
         Resource = "*"
       },
       {
-        Sid    = "Allow use of the key"
+        Sid = "Allow use of the key"
         #delegated for use of the key
         Effect = "Allow"
         Principal = {
