@@ -1,5 +1,5 @@
 resource "aws_vpc" "my_vpc" {
-  cidr_block       = var.vpc_CIDR
+  cidr_block = var.vpc_CIDR
 
   tags = {
     Name = "project-vpc"
@@ -16,10 +16,10 @@ resource "aws_subnet" "private" {
 }
 
 resource "aws_subnet" "public" {
-  vpc_id     = aws_vpc.my_vpc.id
-  cidr_block = var.public_CIDR
+  vpc_id                  = aws_vpc.my_vpc.id
+  cidr_block              = var.public_CIDR
   map_public_ip_on_launch = true
-  availability_zone = "us-east-1a"
+  availability_zone       = "us-east-1a"
 
   tags = {
     Name = "public"
@@ -27,10 +27,10 @@ resource "aws_subnet" "public" {
 }
 
 resource "aws_subnet" "public_2" {
-  vpc_id     = aws_vpc.my_vpc.id
-  cidr_block = var.public_2_CIDR
+  vpc_id                  = aws_vpc.my_vpc.id
+  cidr_block              = var.public_2_CIDR
   map_public_ip_on_launch = true
-  availability_zone = "us-east-1b"
+  availability_zone       = "us-east-1b"
 
   tags = {
     Name = "public_2"
@@ -69,7 +69,7 @@ resource "aws_route_table_association" "route-ass_2" {
 }
 
 resource "aws_eip" "nat_gw_eip" {
-  domain   = "vpc"
+  domain = "vpc"
 }
 
 resource "aws_nat_gateway" "nat_gw" {
@@ -89,7 +89,7 @@ resource "aws_route_table" "route_nat" {
   vpc_id = aws_vpc.my_vpc.id
 
   route {
-    cidr_block = var.route_CIDR
+    cidr_block     = var.route_CIDR
     nat_gateway_id = aws_nat_gateway.nat_gw.id
   }
 
