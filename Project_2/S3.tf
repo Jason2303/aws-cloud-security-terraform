@@ -18,6 +18,14 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "sse-kms" {
   }
 }
 
+<<<<<<< HEAD
+=======
+resource "aws_s3_bucket_acl" "example" {
+  bucket = aws_s3_bucket.KMS-locked.id
+  acl    = "private"
+}
+
+>>>>>>> main
 resource "aws_s3_bucket_versioning" "versioning_example" {
   bucket = aws_s3_bucket.KMS-locked.id
   versioning_configuration {
