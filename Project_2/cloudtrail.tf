@@ -7,6 +7,22 @@ resource "aws_s3_bucket" "trails" {
   }
 }
 
+resource "aws_s3_bucket_versioning" "trails_versioning" {
+  bucket = aws_s3_bucket.trails.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "trails_sse" {
+  bucket = aws_s3_bucket.trails.id
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = aws_kms_key.kms-key.arn
+      sse_algorithm     = "aws:kms"
+    }
+  }
+}
 
 resource "aws_s3_bucket_policy" "allow_access_for_CloudTrail" {
   bucket = aws_s3_bucket.trails.id
@@ -55,6 +71,7 @@ resource "aws_cloudtrail" "cloudtrail_logs" {
   include_global_service_events = true
   enable_log_file_validation    = true
   is_multi_region_trail         = true
+  kms_key_id                    = aws_kms_key.kms-key.arn
 }
 
 
