@@ -28,7 +28,7 @@ identification using Checkov. These are remediated in the `main` branch.
 | CKV_AWS_103 | aws_lb_listener | No TLS 1.2 minimum enforced, vulnerable to downgrade attacks |
 | CKV_AWS_378 | aws_lb_target_group | Target group using HTTP, unencrypted backend traffic |
 | CKV_AWS_260 | aws_vpc_security_group_ingress_rule | Security group allows ingress on port 80 from any CIDR |
-| CKV_AWS_91 | ALB access logging bucket policy conflict | isabled pending resolution on main branch |
+| CKV_AWS_91 | ALB access logging bucket policy conflict | disabled pending resolution on main branch |
 
 ## Prerequisites
 
