@@ -87,6 +87,14 @@ resource "aws_s3_bucket" "alb_logs" {
   }
 }
 
+resource "aws_s3_bucket_ownership_controls" "alb_logs_ownership" {
+  bucket = aws_s3_bucket.alb_logs.id
+
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
 resource "aws_s3_bucket_server_side_encryption_configuration" "sse-kms_alb_logs" {
   bucket = aws_s3_bucket.alb_logs.id
 
@@ -105,6 +113,37 @@ resource "aws_s3_bucket_versioning" "versioned_alb_bucket" {
   }
 }
 
+resource "aws_s3_bucket_policy" "alb_logs_policy" {
+  bucket = aws_s3_bucket.alb_logs.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "delivery.logs.amazonaws.com"
+        }
+        Action   = "s3:PutObject"
+        Resource = "${aws_s3_bucket.alb_logs.arn}/alb-logs/AWSLogs/${data.aws_caller_identity.current.account_id}/*"
+        Condition = {
+          StringEquals = {
+            "s3:x-amz-acl" = "bucket-owner-full-control"
+          }
+        }
+      },
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "delivery.logs.amazonaws.com"
+        }
+        Action   = "s3:GetBucketAcl"
+        Resource = aws_s3_bucket.alb_logs.arn
+      }
+    ]
+  })
+}
+
 
 resource "aws_lb" "test" {
   name               = "test-lb-tf"
@@ -119,12 +158,14 @@ resource "aws_lb" "test" {
   access_logs {
     bucket  = aws_s3_bucket.alb_logs.id
     prefix  = "alb-logs"
-    enabled = true
+    enabled = false
   }
 
   tags = {
     Environment = "production"
   }
+
+  depends_on = [aws_s3_bucket_policy.alb_logs_policy, aws_s3_bucket_ownership_controls.alb_logs_ownership]
 }
 
 resource "aws_lb_target_group" "target_group" {
