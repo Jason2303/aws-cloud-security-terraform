@@ -27,4 +27,3 @@ output "kms-alias-key" {
   description = "kms key for S3 bucket"
   value       = aws_kms_alias.kms-alias.arn
 }
-

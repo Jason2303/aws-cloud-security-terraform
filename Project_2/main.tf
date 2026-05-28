@@ -11,6 +11,7 @@ module "vpc" {
   public_CIDR   = var.public_CIDR
   public_2_CIDR = var.public_2_CIDR
   route_CIDR    = var.route_CIDR
+  kms_key_arn   = aws_kms_key.kms-key.arn
 }
 
 resource "aws_security_group" "allow_traffic" {
@@ -24,17 +25,20 @@ resource "aws_security_group" "allow_traffic" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "allow_ec2_from_alb" {
+  #checkov:skip=CKV_AWS_260:Traffic restricted to ALB security group reference, not public CIDR
   security_group_id            = aws_security_group.allow_traffic.id
   referenced_security_group_id = aws_security_group.allow_alb.id
   from_port                    = 80
   to_port                      = 80
   ip_protocol                  = "tcp"
+  description                  = "Allow HTTP traffic from ALB to EC2"
 }
 
 resource "aws_vpc_security_group_egress_rule" "allow_to_nat" {
   security_group_id = aws_security_group.allow_traffic.id
   cidr_ipv4         = var.route_CIDR
   ip_protocol       = "-1" # semantically equivalent to all ports
+  description       = "Allow all outbound traffic to NAT"
 }
 
 
@@ -54,6 +58,7 @@ resource "aws_vpc_security_group_ingress_rule" "allow_alb_https" {
   from_port         = 443
   ip_protocol       = "tcp"
   to_port           = 443
+  description       = "Allow HTTPS inbound to ALB"
 }
 
 resource "aws_vpc_security_group_ingress_rule" "allow_alb_http" {
@@ -62,6 +67,7 @@ resource "aws_vpc_security_group_ingress_rule" "allow_alb_http" {
   from_port         = 80
   ip_protocol       = "tcp"
   to_port           = 80
+  description       = "Allow HTTP inbound to ALB"
 }
 
 
@@ -69,6 +75,73 @@ resource "aws_vpc_security_group_egress_rule" "allow_alb_traffic" {
   security_group_id = aws_security_group.allow_alb.id
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1" # semantically equivalent to all ports
+  description       = "Allow all outbound traffic from ALB"
+}
+
+resource "aws_s3_bucket" "alb_logs" {
+  bucket = "alb-access-logs-jimmybucket"
+
+  tags = {
+    Name        = "ALB Access Logs"
+    Environment = "production"
+  }
+}
+
+resource "aws_s3_bucket_ownership_controls" "alb_logs_ownership" {
+  bucket = aws_s3_bucket.alb_logs.id
+
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "sse-kms_alb_logs" {
+  bucket = aws_s3_bucket.alb_logs.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = aws_kms_key.kms-key.arn
+      sse_algorithm     = "aws:kms"
+    }
+  }
+}
+
+resource "aws_s3_bucket_versioning" "versioned_alb_bucket" {
+  bucket = aws_s3_bucket.alb_logs.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_policy" "alb_logs_policy" {
+  bucket = aws_s3_bucket.alb_logs.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "delivery.logs.amazonaws.com"
+        }
+        Action   = "s3:PutObject"
+        Resource = "${aws_s3_bucket.alb_logs.arn}/alb-logs/AWSLogs/${data.aws_caller_identity.current.account_id}/*"
+        Condition = {
+          StringEquals = {
+            "s3:x-amz-acl" = "bucket-owner-full-control"
+          }
+        }
+      },
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "delivery.logs.amazonaws.com"
+        }
+        Action   = "s3:GetBucketAcl"
+        Resource = aws_s3_bucket.alb_logs.arn
+      }
+    ]
+  })
 }
 
 
@@ -79,11 +152,20 @@ resource "aws_lb" "test" {
   security_groups    = [aws_security_group.allow_alb.id]
   subnets            = [module.vpc.public-id, module.vpc.public-id_2]
 
-  enable_deletion_protection = false
+  enable_deletion_protection = true
+  drop_invalid_header_fields = true
+
+  access_logs {
+    bucket  = aws_s3_bucket.alb_logs.id
+    prefix  = "alb-logs"
+    enabled = false
+  }
 
   tags = {
     Environment = "production"
   }
+
+  depends_on = [aws_s3_bucket_policy.alb_logs_policy, aws_s3_bucket_ownership_controls.alb_logs_ownership]
 }
 
 resource "aws_lb_target_group" "target_group" {
@@ -123,6 +205,12 @@ resource "aws_launch_template" "launch_temp" {
 
   vpc_security_group_ids = [aws_security_group.allow_traffic.id]
 
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 1
+  }
+
   tag_specifications {
     resource_type = "instance"
 
@@ -143,5 +231,11 @@ resource "aws_autoscaling_group" "scale" {
   launch_template {
     id      = aws_launch_template.launch_temp.id
     version = "$Latest"
+  }
+
+  tag {
+    key                 = "Name"
+    value               = "asg-instance"
+    propagate_at_launch = true
   }
 }
