@@ -2,7 +2,7 @@
 Secure AWS Infrastructure built with Terraform. Security-focused architecture with intentional misconfigurations to show vulnerability detection and remediation
 This project provisions a secure, scalable AWS infrastructure using Terraform. The architecture includes a VPC with one private subnet containing an EC2 instance attached to an Auto Scaling Group, and two public subnets across two Availability Zones hosting an Application Load Balancer. KMS-encrypted S3 buckets store CloudTrail audit events and Terraform remote state. GuardDuty provides threat detection and Security Hub enforces CIS and PCI-DSS compliance standards. A GitHub Actions CI/CD pipeline runs Checkov and tfsec security scans on every push, catching misconfigurations before deployment. The insecure-config branch intentionally introduces five security findings to demonstrate vulnerability identification, with the main branch showing full remediation.
 ## Architecture Diagram
-![Architecture](docs/Terraform_drawio.png)
+![Architecture](Project_2/docs/Terraform_drawio.png)
 ## Security Features
 
 - KMS customer-managed keys encrypting S3 buckets and CloudWatch Log Groups
