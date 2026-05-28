@@ -1,34 +1,140 @@
-resource "aws_s3_bucket" "KMS-locked" {
-  bucket = "jimmybucket36571"
+Execution Roadmap — May 27 to Jun 3
+Times are 24h-style, durations in parens. Copy a day's block straight into TickTick's quick-add (or copy line by line).
 
-  tags = {
-    Name        = "My bucket"
-    Environment = "CF"
-  }
-}
+Wed May 27 — Terraform Polish
+Day goal: Modules exist • README renders • destroy/redeploy clean • repo pinned
+09:00 - Refactor Terraform: extract vpc module (60m)
+10:00 - Refactor Terraform: extract secure-s3 module (60m)
+11:00 - Update root config to call modules cleanly (45m)
+11:45 - terraform plan: verify ZERO resource recreation (30m)
+12:15 - Lunch / step away (45m)
+13:00 - Buffer: fix state misalignments or start diagram early (60m)
+18:00 - Sketch architecture diagram (draw.io / excalidraw) (45m)
+18:45 - README: problem statement + architecture (45m)
+19:30 - README: deploy steps + security features (45m)
+20:15 - terraform destroy: tear down entire stack (30m)
+20:45 - Redeploy from scratch: verify clean (45m)
+21:30 - Pin Terraform repo to GitHub profile (15m)
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "sse-kms" {
-  bucket = aws_s3_bucket.KMS-locked.id
+Thu May 28 — GitHub Actions Pipeline
+Day goal: Pipeline live • Checkov + tfsec gating PRs • screencast saved + linked in README
+09:00 - Watch Fireship CI/CD video (10m)
+09:10 - Create .github/workflows/terraform.yml: checkout + setup-terraform (50m)
+10:00 - Add fmt -check, validate, plan steps (45m)
+10:45 - Configure AWS credentials as GitHub Secrets (30m)
+11:15 - First green run on main (45m)
+12:00 - Lunch / step away (60m)
+13:00 - Buffer: pipeline debugging if needed (60m)
+18:00 - Add Checkov as a job step (45m)
+18:45 - Add tfsec as a parallel job step (45m)
+19:30 - Create branch with intentionally insecure S3 (public bucket) (30m)
+20:00 - Open PR: confirm pipeline FAILS (15m)
+20:15 - Fix the insecure resource: confirm pipeline PASSES (30m)
+20:45 - Record screencast of failing -> passing pipeline (30m)
+21:15 - Link screencast in Terraform README (30m)
 
-  rule {
-    apply_server_side_encryption_by_default {
-      kms_master_key_id = aws_kms_key.kms-key.arn
-      sse_algorithm     = "aws:kms"
-    }
-  }
-}
+Fri May 29 — Docker Sessions 11-13
+Day goal: Docker image in ECR • Trivy before/after documented • Docker repo public + pinned
+09:00 - Configure AWS CLI (aws configure) (15m)
+09:15 - Create ECR repo via CLI (15m)
+09:30 - Authenticate Docker to ECR (aws ecr get-login-password) (30m)
+10:00 - Tag capstone image with ECR URI (15m)
+10:15 - Push image to ECR (30m)
+10:45 - Verify image in ECR console + screenshot (15m)
+11:00 - Break: shift gears for Trivy work (30m)
+11:30 - Install Trivy (15m)
+11:45 - Scan capstone image locally (trivy image) (30m)
+12:15 - Identify at least one HIGH severity finding + screenshot BEFORE (15m)
+12:30 - Fix the finding: newer base image or package update (45m)
+13:15 - Rebuild and rescan: screenshot AFTER (30m)
+13:45 - Save before/after screenshots in repo (15m)
+14:00 - Buffer: Trivy debugging if needed (60m)
+18:00 - Initialize git in docker-learning folder (15m)
+18:15 - README: what you built across 10 days (45m)
+19:00 - README: stack per project + how to run each (45m)
+19:45 - Add Trivy before/after section + ECR screenshot (30m)
+20:15 - Add .gitignore (pycache, .env, credentials) (15m)
+20:30 - Push to GitHub, verify renders cleanly (30m)
+21:00 - Pin Docker repo to GitHub profile (15m)
 
-resource "aws_s3_bucket_acl" "example" {
-  bucket = aws_s3_bucket.KMS-locked.id
-  acl    = "private"
-}
+Sat May 30 — Boto3 Foundations + Build 1
+Day goal: Scripts 1 + 2 pushed to boto3-security-scripts repo, both run cleanly
+09:00 - Tech Yesh Boto3 intro (HARD CAP 60m)
+10:00 - Skim official Boto3 docs structure (30m)
+10:30 - Set up virtualenv + pip install boto3 (15m)
+10:45 - Configure AWS credentials profile for boto3 (15m)
+11:00 - Smoke test: list buckets via boto3 (15m)
+11:15 - Buffer: re-read docs or extra setup (45m)
+12:00 - Lunch / step away (60m)
+13:00 - Buffer: plan scripts 1 + 2 logic (60m)
+18:00 - Script 1: list all S3 buckets (45m)
+18:45 - Script 1: flag unencrypted OR public-ACL buckets (45m)
+19:30 - Script 2: list IAM users (30m)
+20:00 - Script 2: flag missing MFA or keys older than 90 days (45m)
+20:45 - Create boto3-security-scripts repo (15m)
+21:00 - Commit and push scripts 1 + 2 (15m)
 
-resource "aws_s3_bucket_versioning" "versioning_example" {
-  bucket = aws_s3_bucket.KMS-locked.id
-  versioning_configuration {
-    status = "Enabled"
-  }
-}
+Sun May 31 — Boto3 Build 2 + 3
+Day goal: Five-script CLI tool with usage README, repo public
+09:00 - Script 3: pull GuardDuty findings via boto3 (60m)
+10:00 - Script 3: filter HIGH severity, output JSON (45m)
+10:45 - Buffer / quick break (15m)
+11:00 - Script 4: programmatic EC2 start/stop (60m)
+12:00 - Lunch / step away (60m)
+13:00 - Script 4: tag-based filtering (60m)
+15:00 - cloudprojects.dev weekly build session (120m)
+18:00 - Script 5: Security Hub finding response (45m)
+18:45 - Script 5: suppress patterns + SNS escalation (45m)
+19:30 - Wrap all 5 scripts in unified CLI (argparse or click) (60m)
+20:30 - Test all CLI commands end-to-end (30m)
+21:00 - README with usage examples (30m)
+22:00 - Weekly review: what shipped, what slipped, adjust next week (30m)
 
+Mon Jun 1 — Kubernetes Foundations
+Day goal: Capstone app running on local K8s, all objects written manually
+09:00 - Nana K8s crash course (HARD CAP 60m)
+10:00 - Install minikube or kind (30m)
+10:30 - Deploy first pod and service (45m)
+11:15 - kubectl basics: get, describe, logs, exec (45m)
+12:00 - Lunch / step away (60m)
+13:00 - Deploy Docker capstone image to cluster (60m)
+18:00 - Write Deployment manifest from scratch (45m)
+18:45 - Write Service manifest from scratch (30m)
+19:15 - Write ConfigMap manifest from scratch (30m)
+19:45 - Write Secret manifest from scratch (30m)
+20:15 - Wire all manifests together for capstone app (60m)
+21:15 - Verify capstone app running end-to-end on local K8s (30m)
 
+Tue Jun 2 — K8s Security + Falco
+Day goal: RBAC + NetworkPolicy live • Falco running • 2 custom rules demoable
+09:00 - Read on RBAC concepts (30m)
+09:30 - Write Role + RoleBinding from scratch (45m)
+10:15 - Write ServiceAccount from scratch (30m)
+10:45 - Apply and test RBAC restrictions (kubectl auth can-i) (45m)
+11:30 - Write NetworkPolicy to restrict pod-to-pod (45m)
+12:15 - Test NetworkPolicy enforcement (30m)
+12:45 - Lunch / step away (45m)
+13:30 - Read on why default K8s secrets are weak (30m)
+18:00 - Install Falco on cluster (45m)
+18:45 - Trigger detection: exec into pod, read /etc/shadow (30m)
+19:15 - Capture alert output (15m)
+19:30 - Write custom Falco rule: crypto miner names (45m)
+20:15 - Write custom Falco rule: suspicious egress (45m)
+21:00 - Test both custom rules trigger correctly (30m)
 
+Wed Jun 3 — Polish + CV refresh
+Day goal: CV v2 ready • all repos clean and public • LinkedIn featured section updated
+09:00 - Sketch K8s architecture diagram (45m)
+09:45 - Write K8s project README (60m)
+10:45 - Push K8s repo to GitHub + pin to profile (15m)
+11:00 - Update LinkedIn featured section (60m)
+12:00 - Lunch / step away (60m)
+13:00 - Buffer: polish whatever feels weakest (60m)
+18:00 - CV: add Terraform project bullet (15m)
+18:15 - CV: add Docker project bullet (15m)
+18:30 - CV: add K8s + Falco project bullet (15m)
+18:45 - CV: add Boto3 security CLI bullet (15m)
+19:00 - Tighten every CV bullet: outcome or tool, not task (60m)
+20:00 - Compress CV to 1 page, remote-optimized (45m)
+20:45 - Audit every repo: README, .gitignore, no leaked creds (45m)
+21:30 - Verify all repos public + pinned (CV V2 READY) (15m)
