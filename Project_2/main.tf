@@ -25,6 +25,7 @@ resource "aws_security_group" "allow_traffic" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "allow_ec2_from_alb" {
+  #checkov:skip=CKV_AWS_260:Traffic restricted to ALB security group reference, not public CIDR
   security_group_id            = aws_security_group.allow_traffic.id
   referenced_security_group_id = aws_security_group.allow_alb.id
   from_port                    = 80
@@ -114,6 +115,12 @@ resource "aws_lb" "test" {
 
   enable_deletion_protection = true
   drop_invalid_header_fields = true
+
+  access_logs {
+    bucket  = aws_s3_bucket.alb_logs.id
+    prefix  = "alb-logs"
+    enabled = true
+  }
 
   tags = {
     Environment = "production"
